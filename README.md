@@ -19,7 +19,7 @@ Features
 
 ```sh
 # clone terlebih dahulu lewat cli (cmd, bash, atau yg lain)
-
+https://github.com/Hengbro/absensi-pln.git
 # masuk ke foldernya
 cd absensi-app
 
@@ -47,7 +47,7 @@ php artisan serve
 -   Clone this repository
 
 ```sh
-git clone https://github.com/muhammadpauzi/absensi-app.git
+https://github.com/Hengbro/absensi-pln.git
 # make sure you are in the folder
 cd absensi-app
 ```
