@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Presence;
 use App\Models\Position;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 
 class DashboardController extends Controller
 {
@@ -14,6 +16,9 @@ class DashboardController extends Controller
     {
         $today = Carbon::today();
         $period = $request->get('period', 'daily');
+
+        // Add debugging
+        Log::info('Dashboard accessed with period: ' . $period);
 
         $positionCount = Position::count();
         $userCount = User::count();
@@ -36,6 +41,13 @@ class DashboardController extends Controller
         // Grafik bulanan
         $monthlyChart = $this->getMonthlyAttendanceChart($today);
 
+        // Debug chart data
+        Log::info('Chart data generated:', [
+            'todayChart' => $todayChart,
+            'attendanceChart' => $attendanceChart,
+            'monthlyChart' => $monthlyChart
+        ]);
+
         return view('dashboard.index', compact(
             'positionCount',
             'userCount',
@@ -51,7 +63,8 @@ class DashboardController extends Controller
 
     private function getTodayChart($today, $userCount, $hadirToday, $izinToday)
     {
-        $alphaToday = $userCount - ($hadirToday + $izinToday);
+        // Fix: Pastikan alpha tidak negatif
+        $alphaToday = max(0, $userCount - ($hadirToday + $izinToday));
         
         return [
             'labels' => ['Hadir', 'Izin', 'Alpha'],
@@ -68,8 +81,8 @@ class DashboardController extends Controller
         $izinCounts = [];
         $alphaCounts = [];
 
-        // Data 6 bulan terakhir
-        for ($i = 5; $i >= 0; $i--) {
+        // Data 12 bulan terakhir untuk konsistensi dengan view
+        for ($i = 11; $i >= 0; $i--) {
             $monthDate = $today->copy()->subMonths($i);
             $monthStart = $monthDate->copy()->startOfMonth();
             $monthEnd = $monthDate->copy()->endOfMonth();
@@ -84,8 +97,8 @@ class DashboardController extends Controller
                 ->where('is_permission', 1)
                 ->count();
 
-            // Hitung hari kerja dalam bulan (asumsi 22 hari kerja)
-            $workDays = 22;
+            // Hitung total hari kerja dalam bulan (skip weekends)
+            $workDays = $this->getWorkDaysInMonth($monthStart, $monthEnd);
             $totalExpected = User::count() * $workDays;
             $totalPresent = $hadirCount + $izinCount;
             $alphaCount = max(0, $totalExpected - $totalPresent);
@@ -100,7 +113,7 @@ class DashboardController extends Controller
             'hadir' => $hadirCounts,
             'izin' => $izinCounts,
             'alpha' => $alphaCounts,
-            'title' => 'Kehadiran Bulanan (6 Bulan Terakhir)'
+            'title' => 'Tren Kehadiran 12 Bulan Terakhir'
         ];
     }
 
@@ -126,16 +139,19 @@ class DashboardController extends Controller
         $izinCounts = [];
         $alphaCounts = [];
 
-        $allUsers = User::all();
+        $allUsers = User::count(); // Simplified
 
         for ($i = 6; $i >= 0; $i--) {
             $date = $today->copy()->subDays($i);
             $labels[] = $date->format('d M');
 
-            $activeUsers = $allUsers->filter(function ($user) use ($date) {
-                return $user->start_date <= $date &&
-                    (!$user->end_date || $user->end_date >= $date);
-            })->count();
+            // Skip weekends for more accurate data
+            if ($date->isWeekend()) {
+                $hadirCounts[] = 0;
+                $izinCounts[] = 0;
+                $alphaCounts[] = 0;
+                continue;
+            }
 
             $hadirCount = Presence::whereDate('presence_date', $date)
                 ->where('is_permission', 0)
@@ -145,11 +161,11 @@ class DashboardController extends Controller
                 ->where('is_permission', 1)
                 ->count();
 
-            $alphaCount = $activeUsers - ($hadirCount + $izinCount);
+            $alphaCount = max(0, $allUsers - ($hadirCount + $izinCount));
 
             $hadirCounts[] = $hadirCount;
             $izinCounts[] = $izinCount;
-            $alphaCounts[] = max(0, $alphaCount);
+            $alphaCounts[] = $alphaCount;
         }
 
         return [
@@ -182,7 +198,7 @@ class DashboardController extends Controller
                 ->where('is_permission', 1)
                 ->count();
 
-            $workDays = 5;
+            $workDays = 5; // Mon-Fri
             $totalExpected = User::count() * $workDays;
             $totalPresent = $hadirCount + $izinCount;
             $alphaCount = max(0, $totalExpected - $totalPresent);
@@ -223,7 +239,7 @@ class DashboardController extends Controller
                 ->where('is_permission', 1)
                 ->count();
 
-            $workDays = 22;
+            $workDays = $this->getWorkDaysInMonth($monthStart, $monthEnd);
             $totalExpected = User::count() * $workDays;
             $totalPresent = $hadirCount + $izinCount;
             $alphaCount = max(0, $totalExpected - $totalPresent);
@@ -240,5 +256,23 @@ class DashboardController extends Controller
             'alpha' => $alphaCounts,
             'title' => 'Kehadiran Bulanan (6 Bulan Terakhir)'
         ];
+    }
+
+    /**
+     * Calculate work days in a month (excluding weekends)
+     */
+    private function getWorkDaysInMonth($startDate, $endDate)
+    {
+        $workDays = 0;
+        $current = $startDate->copy();
+        
+        while ($current->lte($endDate)) {
+            if (!$current->isWeekend()) {
+                $workDays++;
+            }
+            $current->addDay();
+        }
+        
+        return $workDays;
     }
 }

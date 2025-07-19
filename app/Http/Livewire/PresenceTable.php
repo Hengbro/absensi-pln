@@ -58,7 +58,10 @@ final class PresenceTable extends PowerGridComponent
                 Presence::whereIn('id', $ids)->delete();
                 $this->dispatchBrowserEvent('showToast', ['success' => true, 'message' => 'Data absensi berhasi dihapus.']);
             } catch (\Illuminate\Database\QueryException $ex) {
-                $this->dispatchBrowserEvent('showToast', ['success' => false, 'message' => 'Data gagal dihapus, kemungkinan ada data lain yang menggunakan data tersebut.']);
+                $this->dispatchBrowserEvent('showToast', [
+                    'success' => false,
+                    'message' => 'Error: ' . $ex->getMessage()
+                ]);
             }
         }
     }
@@ -79,7 +82,7 @@ final class PresenceTable extends PowerGridComponent
             Exportable::make('export')
                 ->striped()
                 ->type(Exportable::TYPE_XLS, Exportable::TYPE_CSV),
-            Header::make()->showSearchInput(),//->showToggleColumns(),
+            Header::make()->showSearchInput(), //->showToggleColumns(),
             Footer::make()
                 ->showPerPage()
                 ->showRecordCount(),
@@ -140,12 +143,14 @@ final class PresenceTable extends PowerGridComponent
             ->addColumn('user_name')
             ->addColumn("presence_date")
             ->addColumn("presence_enter_time")
-            ->addColumn("presence_out_time", fn (Presence $model) => $model->presence_out_time ?? '<span class="badge text-bg-danger">Belum Absensi Pulang</span>')
-            ->addColumn("is_permission", fn (Presence $model) => $model->is_permission ?
+            ->addColumn("presence_out_time", fn(Presence $model) => $model->presence_out_time ?? '<span class="badge text-bg-danger">Belum Absensi Pulang</span>')
+            ->addColumn("is_permission", fn(Presence $model) => $model->is_permission ?
                 '<span class="badge text-bg-warning">Izin</span>' : '<span class="badge text-bg-success">Hadir</span>')
             ->addColumn('created_at')
-            ->addColumn('created_at_formatted', fn (Presence $model) => Carbon::parse($model->created_at)->format('d/m/Y H:i:s'));
+            ->addColumn('created_at_formatted', fn(Presence $model) => Carbon::parse($model->created_at)->format('d/m/Y H:i:s'));
     }
+
+
 
     /*
     |--------------------------------------------------------------------------
@@ -193,12 +198,14 @@ final class PresenceTable extends PowerGridComponent
             Column::make('Status', 'is_permission')
                 ->sortable(),
 
-            Column::make('Created at', 'created_at')
+            Column::make('Created at (Filter)', 'created_at')
+                ->makeInputDatePicker('presences.created_at')
+                ->searchable(),
+
+            Column::make('Created at (Tampil)', 'created_at_formatted') // Ini hanya untuk tampil
+                ->sortable()
                 ->hidden(),
 
-            Column::make('Created at', 'created_at_formatted')
-                ->makeInputDatePicker()
-                ->searchable()
         ];
     }
 

@@ -16,8 +16,8 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained(); // Penerima notifikasi (admin)
-            $table->foreignId('permission_id')->constrained(); // Pengajuan izin terkait
+            $table->foreignId('user_id')->constrained(); 
+            $table->foreignId('permission_id')->constrained();
             $table->string('type')->default('permission');
             $table->boolean('is_read')->default(false);
             $table->timestamps();

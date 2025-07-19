@@ -8,7 +8,7 @@
             <div class="card shadow">
                 <div class="card-body text-center">
                     <h6 class="text-muted">Data Jabatan</h6>
-                    <h4 class="fw-bold">{{ $positionCount }}</h4>
+                    <h4 class="fw-bold">{{ $positionCount ?? 0 }}</h4>
                 </div>
             </div>
         </div>
@@ -16,7 +16,7 @@
             <div class="card shadow">
                 <div class="card-body text-center">
                     <h6 class="text-muted">Total Karyawan</h6>
-                    <h4 class="fw-bold">{{ $userCount }}</h4>
+                    <h4 class="fw-bold">{{ $userCount ?? 0 }}</h4>
                 </div>
             </div>
         </div>
@@ -24,7 +24,7 @@
             <div class="card shadow">
                 <div class="card-body text-center">
                     <h6 class="text-muted">Hadir Hari Ini</h6>
-                    <h4 class="fw-bold text-success">{{ $hadirToday }}</h4>
+                    <h4 class="fw-bold text-success">{{ $hadirToday ?? 0 }}</h4>
                 </div>
             </div>
         </div>
@@ -32,7 +32,7 @@
             <div class="card shadow">
                 <div class="card-body text-center">
                     <h6 class="text-muted">Izin Hari Ini</h6>
-                    <h4 class="fw-bold text-warning">{{ $izinToday }}</h4>
+                    <h4 class="fw-bold text-warning">{{ $izinToday ?? 0 }}</h4>
                 </div>
             </div>
         </div>
@@ -44,7 +44,7 @@
             <div class="card shadow">
                 <div class="card-body text-center">
                     <h6 class="text-muted">Belum Absen Hari Ini</h6>
-                    <h4 class="fw-bold text-danger">{{ $notYetAbsenUsers->count() }}</h4>
+                    <h4 class="fw-bold text-danger">{{ $notYetAbsenUsers->count() ?? 0 }}</h4>
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@
         <div class="card-body">
             <h5 class="fw-bold mb-3">Pegawai Belum Absen Hari Ini</h5>
             <div class="row">
-                @forelse($notYetAbsenUsers as $user)
+                @forelse($notYetAbsenUsers ?? [] as $user)
                 <div class="col-md-3 mb-2">
                     <span class="badge bg-danger">{{ $user->name }}</span>
                 </div>
@@ -76,7 +76,7 @@
         <div class="col-md-4">
             <div class="card shadow">
                 <div class="card-body">
-                    <h5 class="fw-bold mb-3">{{ $todayChart['title'] }}</h5>
+                    <h5 class="fw-bold mb-3">{{ $todayChart['title'] ?? 'Kehadiran Hari Ini' }}</h5>
                     <div class="chart-container" style="position: relative; height: 300px;">
                         <canvas id="todayChart" width="400" height="300"></canvas>
                     </div>
@@ -89,7 +89,7 @@
             <div class="card shadow">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0">{{ $attendanceChart['title'] }}</h5>
+                        <h5 class="fw-bold mb-0">{{ $attendanceChart['title'] ?? 'Kehadiran Periode' }}</h5>
                         <div class="btn-group" role="group">
                             <a href="{{ url('dashboard?period=daily') }}"
                                 class="btn btn-sm {{ $period == 'daily' ? 'btn-primary' : 'btn-outline-primary' }}">
@@ -118,8 +118,7 @@
         <div class="col-md-12">
             <div class="card shadow">
                 <div class="card-body">
-                    <h5 class="fw-bold mb-3">{{ $monthlyChart['title'] }}</h5>
-                    <!-- <pre>{{ json_encode($monthlyChart, JSON_PRETTY_PRINT) }}</pre> -->
+                    <h5 class="fw-bold mb-3">{{ $monthlyChart['title'] ?? 'Tren Bulanan' }}</h5>
                     <div class="chart-container" style="position: relative; height: 400px;">
                         <canvas id="monthlyChart"></canvas>
                     </div>
@@ -134,7 +133,7 @@
             <div class="card bg-success text-white">
                 <div class="card-body text-center">
                     <h6>Total Hadir ({{ $period == 'daily' ? '7 Hari' : ($period == 'weekly' ? '4 Minggu' : '6 Bulan') }})</h6>
-                    <h4 id="totalHadir">{{ array_sum($attendanceChart['hadir']) }}</h4>
+                    <h4 id="totalHadir">{{ isset($attendanceChart['hadir']) ? array_sum($attendanceChart['hadir']) : 0 }}</h4>
                 </div>
             </div>
         </div>
@@ -142,7 +141,7 @@
             <div class="card bg-warning text-white">
                 <div class="card-body text-center">
                     <h6>Total Izin ({{ $period == 'daily' ? '7 Hari' : ($period == 'weekly' ? '4 Minggu' : '6 Bulan') }})</h6>
-                    <h4 id="totalIzin">{{ array_sum($attendanceChart['izin']) }}</h4>
+                    <h4 id="totalIzin">{{ isset($attendanceChart['izin']) ? array_sum($attendanceChart['izin']) : 0 }}</h4>
                 </div>
             </div>
         </div>
@@ -150,30 +149,40 @@
             <div class="card bg-danger text-white">
                 <div class="card-body text-center">
                     <h6>Total Alpha ({{ $period == 'daily' ? '7 Hari' : ($period == 'weekly' ? '4 Minggu' : '6 Bulan') }})</h6>
-                    <h4 id="totalAlpha">{{ array_sum($attendanceChart['alpha']) }}</h4>
+                    <h4 id="totalAlpha">{{ isset($attendanceChart['alpha']) ? array_sum($attendanceChart['alpha']) : 0 }}</h4>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Hidden data for charts -->
-<script type="text/javascript">
-    window.chartData = {
-        today: @json($todayChart),
-        attendance: @json($attendanceChart),
-        monthly: @json($monthlyChart)
-    };
-</script>
 @endsection
-
 
 @section('script')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
-    
+
+    window.chartData = @json([
+        'today' => $todayChart,
+        'attendance' => $attendanceChart,
+        'monthly' => $monthlyChart
+    ]);
+    console.log('DEBUG ChartData:', window.chartData);
+
 document.addEventListener("DOMContentLoaded", function() {
-    console.log("Script for chart loaded");
+    console.log("Chart script loaded");
+    console.log("Chart data:", window.chartData);
+    console.log("Chart Data Today:", window.chartData.today);
+    console.log("Chart Data Attendance:", window.chartData.attendance);
+    console.log("Chart Data Monthly:", window.chartData.monthly);
+
+
+    // Check if chart data exists
+    if (!window.chartData) {
+        console.error("Chart data not found!");
+        return;
+    }
+
     // Colors
     const colors = {
         hadir: '#28a745',
@@ -182,140 +191,147 @@ document.addEventListener("DOMContentLoaded", function() {
     };
 
     // 1. PIE CHART - Kehadiran Hari Ini
-    const todayCtx = document.getElementById('todayChart').getContext('2d');
-    new Chart(todayCtx, {
-        type: 'pie',
-        data: {
-            labels: window.chartData.today.labels,
-            datasets: [{
-                data: window.chartData.today.data,
-                backgroundColor: window.chartData.today.colors,
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        usePointStyle: true
+    if (window.chartData.today && window.chartData.today.labels) {
+        const todayCtx = document.getElementById('todayChart').getContext('2d');
+        new Chart(todayCtx, {
+            type: 'pie',
+            data: {
+                labels: window.chartData.today.labels || [],
+                datasets: [{
+                    data: window.chartData.today.data || [],
+                    backgroundColor: window.chartData.today.colors || [],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
                     }
                 }
             }
-        }
-    });
+        });
+    }
 
     // 2. BAR CHART - Kehadiran Periode
-    const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
-    new Chart(attendanceCtx, {
-        type: 'bar',
-        data: {
-            labels: window.chartData.attendance.labels,
-            datasets: [
-                {
-                    label: 'Hadir',
-                    data: window.chartData.attendance.hadir,
-                    backgroundColor: colors.hadir,
-                    borderColor: colors.hadir,
-                    borderWidth: 1
+    if (window.chartData.attendance && window.chartData.attendance.labels) {
+        const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+        new Chart(attendanceCtx, {
+            type: 'bar',
+            data: {
+                labels: window.chartData.attendance.labels || [],
+                datasets: [
+                    {
+                        label: 'Hadir',
+                        data: window.chartData.attendance.hadir || [],
+                        backgroundColor: colors.hadir,
+                        borderColor: colors.hadir,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Izin',
+                        data: window.chartData.attendance.izin || [],
+                        backgroundColor: colors.izin,
+                        borderColor: colors.izin,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Alpha',
+                        data: window.chartData.attendance.alpha || [],
+                        backgroundColor: colors.alpha,
+                        borderColor: colors.alpha,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
                 },
-                {
-                    label: 'Izin',
-                    data: window.chartData.attendance.izin,
-                    backgroundColor: colors.izin,
-                    borderColor: colors.izin,
-                    borderWidth: 1
-                },
-                {
-                    label: 'Alpha',
-                    data: window.chartData.attendance.alpha,
-                    backgroundColor: colors.alpha,
-                    borderColor: colors.alpha,
-                    borderWidth: 1
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        precision: 0
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
                     }
                 }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
             }
-        }
-    });
+        });
+    }
 
     // 3. LINE CHART - Kehadiran Bulanan
-    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-    new Chart(monthlyCtx, {
-        type: 'line',
-        data: {
-            labels: window.chartData.monthly.labels,
-            datasets: [
-                {
-                    label: 'Hadir',
-                    data: window.chartData.monthly.hadir,
-                    backgroundColor: 'rgba(40, 167, 69, 0.2)',
-                    borderColor: colors.hadir,
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4
-                },
-                {
-                    label: 'Izin',
-                    data: window.chartData.monthly.izin,
-                    backgroundColor: 'rgba(255, 193, 7, 0.2)',
-                    borderColor: colors.izin,
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4
-                },
-                {
-                    label: 'Alpha',
-                    data: window.chartData.monthly.alpha,
-                    backgroundColor: 'rgba(220, 53, 69, 0.2)',
-                    borderColor: colors.alpha,
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        precision: 0
+    if (window.chartData.monthly && window.chartData.monthly.labels) {
+        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+        new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: window.chartData.monthly.labels || [],
+                datasets: [
+                    {
+                        label: 'Hadir',
+                        data: window.chartData.monthly.hadir || [],
+                        backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                        borderColor: colors.hadir,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Izin',
+                        data: window.chartData.monthly.izin || [],
+                        backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                        borderColor: colors.izin,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Alpha',
+                        data: window.chartData.monthly.alpha || [],
+                        backgroundColor: 'rgba(220, 53, 69, 0.2)',
+                        borderColor: colors.alpha,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
                     }
-                }
+                ]
             },
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        padding: 20,
-                        usePointStyle: true
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
                     }
                 }
             }
-        }
-    });
+        });
+    }
 });
 </script>
 @endsection

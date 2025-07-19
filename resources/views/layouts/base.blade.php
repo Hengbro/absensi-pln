@@ -76,6 +76,9 @@
         });
     </script>
 
+    <script>
+        window.bootstrap = bootstrap;
+    </script>
+    @yield('script')
 </body>
-
 </html>

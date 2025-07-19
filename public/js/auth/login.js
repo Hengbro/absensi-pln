@@ -26,15 +26,16 @@ loginForm.addEventListener("submit", async function (e) {
     }
 
     if (res.status == 400) {
-        toast.show({
-            title: "Informasi",
-            body: `<span>${data.message}</span>`,
-            colorClass: toast.TOAST_DANGER,
-        });
-        setTimeout(() => {
-        window.location.assign(data.redirect_to);
-    }, 500);
-    }
+    toast.show({
+        title: "Informasi",
+        body: `<span>${data.message}</span>`,
+        colorClass: toast.TOAST_DANGER,
+    });
+
+    // Jangan redirect!
+    return;
+}
+
 
     if (res.status == 200) {
     console.log("Login success:", data); // Debug

@@ -90,6 +90,7 @@ class HomeController extends Controller
     // for qrcode
     public function sendEnterPresenceUsingQRCode()
     {
+        $data = null;
         $code = request('code');
         $attendance = Attendance::query()->where('code', $code)->first();
 
@@ -109,6 +110,7 @@ class HomeController extends Controller
             ]);
         }
 
+        // dd($data);
         return response()->json([
             "success" => false,
             "message" => "Terjadi masalah pada saat melakukan absensi."

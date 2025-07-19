@@ -1,25 +1,26 @@
-<nav class="navbar navbar-expand-md bg-dark navbar-dark py-3">
-    <div class="container">
-        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false"
-            aria-label="Toggle navigation">
+<header class="navbar navbar-expand-md navbar-dark sticky-top shadow-sm" style="background-color: #002b5b;">
+    <div class="container-fluid">
+        <button class="navbar-toggler border-0" type="button"
+            data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu"
+            aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
-            <ul class="navbar-nav align-items-md-center gap-md-4 py-2 py-md-0">
-                <li class="nav-item px-4 py-1 px-md-0 py-md-0">
-                    <a class="nav-link {{ request()->routeIs('home.*') ? 'active fw-bold' : '' }}" aria-current="page"
-                        href="{{ route('home.index') }}">Beranda</a>
-                </li>
-                <li class="nav-item px-4 py-1 px-md-0 py-md-0">
-                    <form action="{{ route('auth.logout') }}" method="post">
-                        @method('DELETE')
-                        @csrf
 
-                        <button class="btn fw-bold btn-danger w-100">Keluar</button>
-                    </form>
-                </li>
-            </ul>
+        <a class="navbar-brand d-flex align-items-center ms-3" href="{{ url('/') }}">
+            <img src="{{ asset('assets/images/logo.jpg') }}" alt="Logo PLN"
+                style="height: 40px; width: 40px; object-fit: contain; margin-right: 10px;">
+            <span class="fw-semibold" style="font-size: 1.1rem; color: #ffc107;">ABSENSI PLN</span>
+        </a>
+
+        <div class="d-flex ms-auto align-items-center pe-3">
+            <form action="{{ route('auth.logout') }}" method="POST"
+                onsubmit="return confirm('Apakah Anda yakin ingin keluar?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-sm btn-outline-light ms-2">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
         </div>
     </div>
-</nav>
+</header>
